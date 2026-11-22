@@ -32,6 +32,10 @@ function init() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // ACES filmic grade, Nov 22 polish: warmer highlights, deeper dusk
+  // shadows — the sunset sky and neon read as one picture, not flat lambert
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.1, 1200);
 
@@ -350,6 +354,9 @@ function stageShot(name) {
     p.heading = Math.PI; // face north, toward the plaza
     state.camera.yaw = Math.PI;
     state.camera.pitch = 0.12;
+    // Rook is mid-firefight for the shot: tracers and muzzle flashes
+    // in frame, and the crosshair reads as combat, not a stroll
+    state.input.shooting = true;
   }
 }
 
@@ -449,7 +456,7 @@ function tick(now) {
       beacon.visible = false;
     }
     updateTracers();
-    updateAudio(p.inCar ? Math.abs(p.inCar.speed) / 38 : p.speed / 9.5, state.police.length > 0);
+    updateAudio(p.inCar ? Math.abs(p.inCar.speed) / 40 : p.speed / 10, state.police.length > 0);
     updateHUD();
     drawMinimap();
     // end screens
@@ -457,10 +464,11 @@ function tick(now) {
     else if (state.phase === 'wasted') showEnd('WASTED', 'Solmar Bay chewed you up. The hospital patched you up; the jobs are still waiting.');
     else if (state.phase === 'complete') showEnd('STORY COMPLETE', 'Five jobs. The bank. The escape. Dante Voss tears up the $50,000 marker — Solmar Bay is yours now, Rook. Free roam: keep driving.');
   } else if (state.phase === 'title') {
-    // slow orbit around downtown for the title backdrop
+    // slow orbit around downtown for the title backdrop — closer and
+    // lower than before, so the towers and billboards fill the frame
     state.time += dt;
     const t = state.time * 0.05;
-    camera.position.set(Math.sin(t) * 190, 90, Math.cos(t) * 190);
+    camera.position.set(Math.sin(t) * 170, 70, Math.cos(t) * 170);
     camera.lookAt(0, 10, 0);
   }
 

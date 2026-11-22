@@ -3,7 +3,7 @@
 // on-enter hook. Failing (busted/wasted) restarts the current mission.
 import { state, setObjective, showToast, dist2 } from './config.js';
 import { addWanted, spawnEnemies, nearestStealableCar } from './entities.js';
-import { sfxMissionDone, sfxPickup } from './audio.js';
+import { sfxMissionDone, sfxPickup, sfxCash } from './audio.js';
 
 export const MISSIONS = [
   {
@@ -131,7 +131,7 @@ export function startMission(index) {
   state.missionDone = false;
   const m = currentMission();
   if (!m) return;
-  showToast(m.name);
+  showToast(m.name + '  •  $' + m.reward);
   setObjective(m.name, '', '');
   startStep();
 }
@@ -149,6 +149,7 @@ function completeMission() {
   const m = currentMission();
   state.cash += m.reward;
   sfxMissionDone();
+  sfxCash();
   showToast(m.name + ' complete! +$' + m.reward);
   if (state.missionIndex + 1 >= MISSIONS.length) {
     state.missionDone = true;
@@ -167,6 +168,11 @@ export function updateMissions(dt) {
   if (state.phase !== 'playing') return;
   const step = currentStep();
   if (!step) return;
+  // Street War: show the running kill count in the objective line
+  if (state.missionIndex === 3) {
+    const done = state.kills - (state.missionKillsAtStart || 0);
+    setObjective(currentMission().name, 'Take out all 6 Vultures in the plaza  (' + done + '/6)', step.hint);
+  }
   // timer
   if (state.missionTimer > 0) {
     state.missionTimer -= dt;

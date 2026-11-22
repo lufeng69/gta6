@@ -26,9 +26,25 @@ export function updateHUD() {
   if (state.missionTimer > 0) {
     timerEl.classList.remove('hidden');
     timerEl.textContent = Math.ceil(state.missionTimer) + 's';
+    // under 10 seconds the timer pulses red: the player should feel it
+    timerEl.classList.toggle('urgent', state.missionTimer <= 10);
   } else {
     timerEl.classList.add('hidden');
+    timerEl.classList.remove('urgent');
   }
+  // ammo readout, on foot only (the speedo takes its place in a car)
+  const ammoEl = $('ammo');
+  if (!state.player.inCar && state.phase === 'playing') {
+    ammoEl.classList.remove('hidden');
+    ammoEl.textContent = state.player.ammo > 0
+      ? 'AMMO  ' + state.player.ammo + ' / 12   •   R — RELOAD'
+      : 'RELOADING…  •  R — RELOAD';
+    ammoEl.style.color = state.player.ammo === 0 ? '#ff6b5d' : '#ffe08a';
+  } else {
+    ammoEl.classList.add('hidden');
+  }
+  // the minimap frame turns red while the heat is on
+  $('minimapwrap').style.borderColor = state.wanted > 0 ? 'rgba(255,80,80,.9)' : 'rgba(255,255,255,.65)';
   const speedo = $('speedo');
   if (state.player.inCar) {
     speedo.classList.remove('hidden');

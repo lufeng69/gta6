@@ -26,6 +26,22 @@ The city is yours on foot or behind the wheel: traffic and pedestrians,
 stealable cars, a 5-star wanted system with pursuing police, combat, a HUD
 with a live minimap, a start screen, and saving to the browser.
 
+## Polish pass — Nov 22, 2026
+
+A second pass on the submitted build, aimed at the screenshots and the feel:
+
+- **Golden-hour grade** — a gradient sunset sky with a low sun glow, warm
+  haze, and ACES filmic tone mapping, so downtown reads as one picture.
+- **Downtown dressed up** — neon billboards (SOLMAR BAY, CASINO, HEAT) on
+  the landmark towers and rooftop AC units on the skyline.
+- **Driving feel** — a touch quicker off the line, less draggy at speed
+  (top speed 40 m/s), and brake lights that flare while you hold S.
+- **HUD clarity** — an ammo readout on foot, a pulsing red timer under
+  10 seconds, a live kill counter during Street War, the mission payout
+  announced up front, and a red minimap frame while the heat is on.
+- **Sound** — gunshots vary slightly shot to shot; finishing a job pays
+  out with a cash-register cha-ching.
+
 ## Controls
 
 | Key | Action |
@@ -56,6 +72,7 @@ names, places, art or music.
 
 - three.js 0.187.0, vendored under `game/vendor/` (minified builds)
 - ES modules, no build step, no network requests
+- ACES filmic tone mapping + a procedural golden-hour sky (no assets)
 - `main.ts` (Node 22) copies `game/` + `screenshots/` to `/output` and writes
   `dossier.json` with the kit's `vendor/makefun-game.ts`
 

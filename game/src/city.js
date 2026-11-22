@@ -90,8 +90,59 @@ function windowTexture(base, lit) {
   return tex;
 }
 
+function skyTexture() {
+  // golden-hour gradient sky: amber horizon melting into dusk blue.
+  // Rendered as an equirect background, so the title orbit and every
+  // screenshot sit under the same sunset instead of a flat blue.
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0, '#5f8fd0');
+  grad.addColorStop(0.42, '#9fc0e4');
+  grad.addColorStop(0.55, '#f7c98a');
+  grad.addColorStop(0.66, '#ff9a5c');
+  grad.addColorStop(0.75, '#e8b98a');
+  grad.addColorStop(1, '#3a5a7a');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 1024, 512);
+  // low sun glow on the horizon
+  const glow = g.createRadialGradient(760, 330, 8, 760, 330, 180);
+  glow.addColorStop(0, 'rgba(255,236,180,0.95)');
+  glow.addColorStop(0.35, 'rgba(255,190,110,0.55)');
+  glow.addColorStop(1, 'rgba(255,150,80,0)');
+  g.fillStyle = glow;
+  g.fillRect(0, 0, 1024, 512);
+  const tex = new THREE.CanvasTexture(c);
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function billboardTexture(text, bg, fg) {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 192;
+  const g = c.getContext('2d');
+  g.fillStyle = bg; g.fillRect(0, 0, 512, 192);
+  g.strokeStyle = fg; g.lineWidth = 10; g.strokeRect(8, 8, 496, 176);
+  g.fillStyle = fg;
+  g.font = 'bold 64px Arial';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(text, 256, 100);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 export function buildCity(scene) {
   const rng = mulberry32(20261119);
+  // neon billboards for the downtown towers, first three only
+  const BILLBOARDS = [
+    ['SOLMAR BAY', '#101c3a', '#ffd34d'],
+    ['★ CASINO ★', '#3a0a2e', '#ff6bd8'],
+    ['HEAT', '#7a1010', '#ffe9a8'],
+  ];
+  let billboardIdx = 0;
   // ground
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(660, 660),
@@ -141,6 +192,25 @@ export function buildCity(scene) {
         roof.scale.set(w * 0.7, 1.2, d * 0.7);
         roof.position.set(px, h + 0.6, pz);
         scene.add(roof);
+        // rooftop AC unit on about half the roofs: the skyline reads
+        // lived-in from the title orbit instead of flat grey slabs
+        if (rng() < 0.5) {
+          const ac = new THREE.Mesh(roofGeo, new THREE.MeshLambertMaterial({ color: 0x9aa2a8 }));
+          ac.scale.set(2.6, 1.1, 2.2);
+          ac.position.set(px + w * 0.2, h + 1.7, pz - d * 0.18);
+          scene.add(ac);
+        }
+        // one neon billboard per downtown landmark tower, facing the avenue
+        if (central && k === 0 && billboardIdx < BILLBOARDS.length) {
+          const [text, bg, fg] = BILLBOARDS[billboardIdx];
+          billboardIdx += 1;
+          const board = new THREE.Mesh(
+            new THREE.PlaneGeometry(18, 6.75),
+            new THREE.MeshBasicMaterial({ map: billboardTexture(text, bg, fg), side: THREE.DoubleSide }),
+          );
+          board.position.set(px, h - 5, pz + d / 2 + 0.3);
+          scene.add(board);
+        }
         state.buildings.push({ minX: px - w / 2, maxX: px + w / 2, minZ: pz - d / 2, maxZ: pz + d / 2, h });
       }
     }
@@ -200,14 +270,14 @@ export function buildCity(scene) {
     scene.add(dot);
   }
 
-  // sun + sky
-  const hemi = new THREE.HemisphereLight(0xbfd9ff, 0x8a7a5a, 0.95);
+  // sun + sky: low golden-hour sun, warm haze on the horizon
+  const hemi = new THREE.HemisphereLight(0xffe0b8, 0x8a7a5a, 0.9);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xffe8b8, 1.9);
-  sun.position.set(180, 260, 120);
+  const sun = new THREE.DirectionalLight(0xffd9a0, 2.1);
+  sun.position.set(260, 140, 80);
   scene.add(sun);
-  scene.fog = new THREE.Fog(0xcfe4f2, 320, 720);
-  scene.background = new THREE.Color(0x9fc8e8);
+  scene.fog = new THREE.Fog(0xe8c49a, 320, 720);
+  scene.background = skyTexture();
 
   return {
     // handy spawn points, all on streets

@@ -14,10 +14,16 @@ export const WORLD = {
   groundY: 0,
   gravity: 22,
   playerWalk: 6,
-  playerRun: 9.5,
+  playerRun: 10,
   playerRadius: 0.55,
   carRadius: 2.3,
   maxWanted: 5,
+  // arcade car feel, tuned Nov 22: a touch quicker off the line and less
+  // draggy at speed, so the getaway actually feels like one
+  carMaxFwd: 40,
+  carMaxRev: 10,
+  carAccel: 16,
+  carDrag: 0.45,
 };
 
 // Street centre lines, one per axis: streets at -270, -210, ..., 270.

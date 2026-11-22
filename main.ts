@@ -10,7 +10,7 @@
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -38,3 +38,9 @@ writeFileSync(
     game_path_max_bytes: 1000,
   }),
 );
+
+// Build-log summary (stderr only, never into /output): dossier size and
+// screenshot count, so a bad build is visible before anyone submits it.
+const dossierBytes = statSync(join(out, 'dossier.json')).size;
+const shotCount = existsSync(join(out, 'screenshots')) ? readdirSync(join(out, 'screenshots')).length : 0;
+console.error(`SOLMAR HEAT: dossier.json ${dossierBytes} bytes, ${shotCount} screenshots in /output`);

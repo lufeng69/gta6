@@ -61,7 +61,7 @@ function makeCarMesh(color, kind) {
     g.add(blue);
     lightBar = { red, blue };
   }
-  g.userData = { wheels, lightBar };
+  g.userData = { wheels, lightBar, tailMat };
   return g;
 }
 
@@ -636,13 +636,17 @@ export function updatePlayerCar(dt) {
   const car = p.inCar;
   if (!car) return;
   const inp = state.input;
-  const maxFwd = 38;
-  const maxRev = 10;
-  const accel = inp.fwd ? 15 : inp.back ? -20 : 0;
+  const maxFwd = WORLD.carMaxFwd;
+  const maxRev = WORLD.carMaxRev;
+  const accel = inp.fwd ? WORLD.carAccel : inp.back ? -20 : 0;
   car.speed += accel * dt;
-  car.speed -= car.speed * 0.55 * dt; // drag
+  car.speed -= car.speed * WORLD.carDrag * dt; // drag
   if (!inp.fwd && !inp.back) car.speed -= Math.sign(car.speed) * Math.min(Math.abs(car.speed), 9 * dt);
   car.speed = clamp(car.speed, -maxRev, maxFwd);
+  // brake lights flare while the player holds the brake
+  if (car.group.userData.tailMat) {
+    car.group.userData.tailMat.emissiveIntensity = (inp.back && car.speed > 1) ? 2.4 : 0.6;
+  }
   const steer = (inp.left ? 1 : 0) - (inp.right ? 1 : 0);
   const spd = Math.abs(car.speed);
   if (spd > 0.2 && steer !== 0) {

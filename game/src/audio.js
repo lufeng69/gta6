@@ -1,5 +1,7 @@
 // SOLMAR HEAT — all sound is synthesized with WebAudio: no audio files.
 // Engine hum, sirens, gunshots, chimes and a small bassline loop.
+// Nov 22 polish: gunshots vary a little shot to shot, and banking a job
+// pays out with a cash-register cha-ching.
 import { state } from './config.js';
 
 let ctx = null;
@@ -88,7 +90,8 @@ function noiseBurst(dur, vol, filterFreq) {
   src.start(t);
 }
 
-export function sfxGunshot() { noiseBurst(0.14, 0.5, 2400); blip(140, 0.08, 'square', 0.18); }
+export function sfxGunshot() { noiseBurst(0.14, 0.5, 2400); blip(140 * (0.92 + Math.random() * 0.16), 0.08, 'square', 0.18); }
+export function sfxCash() { blip(1318, 0.1, 'triangle', 0.28); blip(1760, 0.22, 'triangle', 0.28, 0.08); }
 export function sfxEnemyShot() { noiseBurst(0.1, 0.22, 1600); }
 export function sfxPickup() { blip(880, 0.12, 'sine', 0.25); blip(1318, 0.18, 'sine', 0.25, 0.09); }
 export function sfxMissionDone() {
